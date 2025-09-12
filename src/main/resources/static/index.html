@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        form input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        #add-employee-button {
+            background-color: #5cb85c;
+            color: white;
+            grid-column: 1 / span 2;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .action-buttons button {
+            margin-right: 5px;
+        }
+        .edit-button { background-color: #0275d8; color: white; }
+        .delete-button { background-color: #d9534f; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Employee Management System</h1>
+
+        <h2>Add New Employee</h2>
+        <form id="employee-form">
+            <input type="text" id="employee-name" placeholder="Name" required>
+            <input type="text" id="employee-department" placeholder="Department" required>
+            <input type="number" id="employee-salary" placeholder="Salary" required>
+            <button type="submit" id="add-employee-button">Add Employee</button>
+        </form>
+
+        <h2>Employee List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Salary</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="employee-table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const employeeForm = document.getElementById('employee-form');
+            const employeeTableBody = document.getElementById('employee-table-body');
+            const API_URL = 'http://localhost:8080/api/employees';
+
+            // Fetch and display all employees
+            async function fetchEmployees() {
+                try {
+                    const response = await fetch(API_URL);
+                    const employees = await response.json();
+                    employeeTableBody.innerHTML = '';
+                    employees.forEach(employee => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${employee.name}</td>
+                            <td>${employee.department}</td>
+                            <td>$${employee.salary.toLocaleString()}</td>
+                            <td class="action-buttons">
+                                <button class="edit-button" onclick="editEmployee('${employee.id}')">Edit</button>
+                                <button class="delete-button" onclick="deleteEmployee('${employee.id}')">Delete</button>
+                            </td>
+                        `;
+                        employeeTableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error fetching employees:', error);
+                }
+            }
+
+            // Add a new employee
+            employeeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newEmployee = {
+                    name: document.getElementById('employee-name').value,
+                    department: document.getElementById('employee-department').value,
+                    salary: parseFloat(document.getElementById('employee-salary').value)
+                };
+                try {
+                    await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newEmployee)
+                    });
+                    employeeForm.reset();
+                    fetchEmployees();
+                } catch (error) {
+                    console.error('Error adding employee:', error);
+                }
+            });
+
+            // Delete an employee
+            window.deleteEmployee = async (id) => {
+                if (confirm('Are you sure you want to delete this employee?')) {
+                    try {
+                        await fetch(`${API_URL}/${id}`, {
+                            method: 'DELETE'
+                        });
+                        fetchEmployees();
+                    } catch (error) {
+                        console.error('Error deleting employee:', error);
+                    }
+                }
+            };
+            
+            // Edit is a bit more complex, we'll keep it simple for this example.
+            // For a real app, you would populate a form with the employee's data.
+            window.editEmployee = (id) => {
+                alert(`Edit functionality for employee ID: ${id} is a work in progress.`);
+            };
+
+            fetchEmployees();
+        });
+    </script>
+</body>
+</html>
