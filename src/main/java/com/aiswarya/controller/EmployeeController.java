@@ -1,10 +1,11 @@
+package com.aiswarya.controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/employees")
-@CrossOrigin(origins = "*") // Allows front-end to connect
+@RequestMapping("/employees")
+
 public class EmployeeController {
 
     private List<Employee> employees = new ArrayList<>();
@@ -16,8 +17,9 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employees;
+    public String test() {
+    return "Employee API Working ✅";
+}
     }
 
     @PostMapping
